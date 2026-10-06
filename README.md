@@ -1,10 +1,10 @@
-🔐 Affine Cipher Tool
+# 🔐 Affine Cipher Tool
 
 A simple, modern web tool to **encrypt and decrypt text** using the Affine Cipher, built with plain HTML, CSS and JavaScript. No libraries, no installation, no backend.
 
 ---
 
-✨ Features
+## ✨ Features
 
 - Encrypt and decrypt with one click using the Encrypt / Decrypt tabs
 - Live results that update as you type
@@ -17,7 +17,7 @@ A simple, modern web tool to **encrypt and decrypt text** using the Affine Ciphe
 
 ---
 
-🧠 How the Affine Cipher Works
+## 🧠 How the Affine Cipher Works
 
 Each letter is converted to a number (A = 0, B = 1, ... Z = 25), then transformed:
 
@@ -41,7 +41,7 @@ Ciphertext : RCLLA
 
 ---
 
-🚀 How to Use
+## 🚀 How to Use
 
 1. Open `index.html` (or `affine_cipher.html`) in any web browser.
 2. Choose **Encrypt** or **Decrypt**.
@@ -53,7 +53,7 @@ To run it locally:
 
 ```
 
-🛠️ Built With
+## 🛠️ Built With
 
 - HTML5
 - CSS3 (glassmorphism-style dark theme)
@@ -61,13 +61,13 @@ To run it locally:
 
 ---
 
-⚠️ Disclaimer
+## ⚠️ Disclaimer
 
 The Affine Cipher is a classical cipher and is **not secure** for real-world data.
 This project is for learning and demonstration purposes only. project is for learning and demonstration purposes only.
 
 ---
 
-📄 License
+## 📄 License
 
 This project is open source and available under the [MIT License](LICENSE).
