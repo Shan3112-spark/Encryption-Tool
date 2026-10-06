@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Affine Cipher Tool</title>
+<style>
+    :root {
+        --bg1: #0f172a;
+        --bg2: #1e1b4b;
+        --card: rgba(255, 255, 255, 0.07);
+        --card-border: rgba(255, 255, 255, 0.14);
+        --text: #e2e8f0;
+        --muted: #94a3b8;
+        --accent: #8b5cf6;
+        --accent2: #06b6d4;
+        --ok: #34d399;
+        --err: #f87171;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+        font-family: 'Segoe UI', system-ui, -apple-system, Roboto, Arial, sans-serif;
+        color: var(--text);
+        min-height: 100vh;
+        background: linear-gradient(135deg, var(--bg1), var(--bg2));
+        background-attachment: fixed;
+        padding: 32px 16px 60px;
+    }
+
+    .container { max-width: 760px; margin: 0 auto; }
+
+    header { text-align: center; margin-bottom: 28px; }
+    header h1 {
+        font-size: 2.2rem;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        background: linear-gradient(90deg, var(--accent), var(--accent2));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+    header p { color: var(--muted); margin-top: 6px; }
+
+    .card {
+        background: var(--card);
+        border: 1px solid var(--card-border);
+        border-radius: 18px;
+        padding: 24px;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+        margin-bottom: 22px;
+    }
+
+    /* Mode toggle */
+    .toggle {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 12px;
+        padding: 4px;
+        margin-bottom: 22px;
+    }
+    .toggle button {
+        border: none;
+        background: transparent;
+        color: var(--muted);
+        padding: 11px;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 9px;
+        cursor: pointer;
+        transition: all 0.25s;
+    }
+    .toggle button.active {
+        color: #fff;
+        background: linear-gradient(90deg, var(--accent), var(--accent2));
+        box-shadow: 0 4px 14px rgba(139, 92, 246, 0.45);
+    }
+
+    label {
+        display: block;
+        font-size: 0.82rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--muted);
+        margin-bottom: 7px;
+    }
+
+    textarea, input, select {
+        width: 100%;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid var(--card-border);
+        border-radius: 10px;
+        color: var(--text);
+        font-size: 1rem;
+        padding: 12px 14px;
+        font-family: inherit;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    textarea { resize: vertical; min-height: 95px; }
+    select option { background: #1e1b4b; color: var(--text); }
+    textarea:focus, input:focus, select:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.25);
+    }
+
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 18px; }
+
+    .hint { font-size: 0.8rem; color: var(--muted); margin-top: 6px; min-height: 1.1em; }
+    .hint.err { color: var(--err); }
+
+    .formula {
+        margin-top: 20px;
+        text-align: center;
+        font-family: 'Cambria Math', Consolas, monospace;
+        font-size: 1.15rem;
+        padding: 12px;
+        border-radius: 10px;
+        background: rgba(139, 92, 246, 0.12);
+        border: 1px dashed rgba(139, 92, 246, 0.5);
+    }
+    .formula small { display: block; color: var(--muted); font-size: 0.8rem; margin-top: 4px; font-family: inherit; }
+
+    .actions { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+    .btn {
+        flex: 1;
+        min-width: 120px;
+        border: 1px solid var(--card-border);
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text);
+        padding: 11px 16px;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.15s, background 0.2s;
+    }
+    .btn:hover { background: rgba(255, 255, 255, 0.16); transform: translateY(-1px); }
+    .btn.primary {
+        border: none;
+        color: #fff;
+        background: linear-gradient(90deg, var(--accent), var(--accent2));
+    }
+
+    /* Output */
+    .output-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .output-head span { font-weight: 700; }
+    .output {
+        min-height: 70px;
+        padding: 16px;
+        border-radius: 10px;
+        background: rgba(0, 0, 0, 0.35);
+        border: 1px solid var(--card-border);
+        font-family: Consolas, 'Courier New', monospace;
+        font-size: 1.25rem;
+        letter-spacing: 1.5px;
+        color: var(--ok);
+        word-break: break-word;
+        white-space: pre-wrap;
+    }
+    .output.empty { color: var(--muted); font-size: 1rem; letter-spacing: 0; font-family: inherit; }
+
+    .toast {
+        position: fixed; bottom: 24px; left: 50%;
+        transform: translateX(-50%) translateY(80px);
+        background: var(--ok); color: #052e1c;
+        padding: 10px 20px; border-radius: 30px; font-weight: 700;
+        opacity: 0; transition: all 0.3s;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+    footer { text-align: center; color: var(--muted); font-size: 0.8rem; margin-top: 10px; }
+
+    @media (max-width: 560px) {
+        .row { grid-template-columns: 1fr; }
+        header h1 { font-size: 1.7rem; }
+    }
+</style>
+</head>
+<body>
+<div class="container">
+
+    <header>
+        <h1>🔐 Affine Cipher Tool</h1>
+        <p>Encrypt and decrypt messages with a linear substitution cipher</p>
+    </header>
+
+    <!-- Input card -->
+    <div class="card">
+        <div class="toggle">
+            <button id="tabEnc" class="active" onclick="setMode('encrypt')">🔒 Encrypt</button>
+            <button id="tabDec" onclick="setMode('decrypt')">🔓 Decrypt</button>
+        </div>
+
+        <label for="message" id="msgLabel">Plaintext message</label>
+        <textarea id="message" placeholder="Type or paste your message here..."></textarea>
+
+        <div class="row">
+            <div>
+                <label for="a">Key a (coprime with 26)</label>
+                <select id="a"></select>
+                <div class="hint" id="aHint"></div>
+            </div>
+            <div>
+                <label for="b">Key b (shift, 0 – 25)</label>
+                <input type="number" id="b" value="8" min="0" max="25">
+                <div class="hint" id="bHint"></div>
+            </div>
+        </div>
+
+        <div class="formula" id="formula"></div>
+
+        <div class="actions">
+            <button class="btn primary" onclick="swap()">⇅ Use output as input &amp; switch mode</button>
+            <button class="btn" onclick="clearAll()">Clear</button>
+        </div>
+    </div>
+
+    <!-- Output card -->
+    <div class="card">
+        <div class="output-head">
+            <span id="outLabel">Ciphertext</span>
+            <button class="btn" style="flex:none;min-width:0;padding:7px 14px" onclick="copyOutput()">📋 Copy</button>
+        </div>
+        <div class="output empty" id="result">Your result will appear here…</div>
+    </div>
+
+    <footer>Affine cipher: E(x) = (a·x + b) mod 26 &nbsp;|&nbsp; D(y) = a⁻¹·(y − b) mod 26</footer>
+</div>
+
+<div class="toast" id="toast">Copied to clipboard!</div>
+
+<script>
+    const M = 26;
+    const VALID_A = [1, 3, 5, 7, 9, 11, 15, 17, 19, 21, 23, 25];
+    let mode = 'encrypt';
+
+    const $ = id => document.getElementById(id);
+    const mod = (n, m) => ((n % m) + m) % m;
+
+    function gcd(a, b) {
+        while (b !== 0) { [a, b] = [b, a % b]; }
+        return a;
+    }
+
+    function modInverse(a, m) {
+        a = mod(a, m);
+        for (let x = 1; x < m; x++) {
+            if ((a * x) % m === 1) return x;
+        }
+        return null;
+    }
+
+    /* ---------- Setup ---------- */
+    VALID_A.forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v;
+        opt.textContent = v;
+        $('a').appendChild(opt);
+    });
+    $('a').value = 5;
+
+    ['message', 'a', 'b'].forEach(id => $(id).addEventListener('input', update));
+    $('a').addEventListener('change', update);
+
+    function setMode(m) {
+        mode = m;
+        $('tabEnc').classList.toggle('active', m === 'encrypt');
+        $('tabDec').classList.toggle('active', m === 'decrypt');
+        $('msgLabel').textContent = m === 'encrypt' ? 'Plaintext message' : 'Ciphertext message';
+        $('outLabel').textContent = m === 'encrypt' ? 'Ciphertext' : 'Plaintext';
+        $('message').placeholder = m === 'encrypt'
+            ? 'Type or paste your message here...'
+            : 'Paste the encrypted text here...';
+        update();
+    }
+
+    /* ---------- Core cipher ---------- */
+    function transform(text, a, b, inv) {
+        let out = '';
+
+        for (const ch of text) {
+            const code = ch.charCodeAt(0);
+            let base = null;
+            if (code >= 65 && code <= 90) base = 65;       // A-Z
+            else if (code >= 97 && code <= 122) base = 97; // a-z
+
+            if (base === null) { out += ch; continue; }    // keep spaces, digits, symbols
+
+            const x = code - base;
+            const y = mode === 'encrypt'
+                ? mod(a * x + b, M)
+                : mod(inv * (x - b), M);
+
+            out += String.fromCharCode(y + base);
+        }
+        return out;
+    }
+
+    /* ---------- UI update ---------- */
+    function update() {
+        const text = $('message').value;
+        const a = parseInt($('a').value, 10);
+        const bRaw = $('b').value;
+        const b = parseInt(bRaw, 10);
+
+        // Validate a
+        const aOk = gcd(a, M) === 1;
+        const inv = aOk ? modInverse(a, M) : null;
+        $('aHint').textContent = aOk ? `Modular inverse a⁻¹ = ${inv}` : "'a' must be coprime with 26";
+        $('aHint').className = 'hint' + (aOk ? '' : ' err');
+
+        // Validate b
+        const bOk = bRaw !== '' && !isNaN(b);
+        $('bHint').textContent = bOk ? (b < 0 || b > 25 ? `Will be used as ${mod(b, M)} (mod 26)` : '') : 'Enter a number for b';
+        $('bHint').className = 'hint' + (bOk ? '' : ' err');
+
+        // Formula
+        if (aOk && bOk) {
+            const bm = mod(b, M);
+            $('formula').innerHTML = mode === 'encrypt'
+                ? `E(x) = (${a}·x + ${bm}) mod 26<small>Each letter is converted to a number (A=0 … Z=25), transformed, then converted back.</small>`
+                : `D(y) = ${inv}·(y − ${bm}) mod 26<small>Uses the modular inverse of a (${a} × ${inv} ≡ 1 mod 26).</small>`;
+        } else {
+            $('formula').textContent = 'Fix the key values to see the formula.';
+        }
+
+        if (!aOk || !bOk) {
+            setResult('', true);
+            return;
+        }
+
+        const out = transform(text, a, mod(b, M), inv);
+        setResult(out, text.length === 0);
+    }
+
+    function setResult(text, empty) {
+        const r = $('result');
+        if (empty || text === '') {
+            r.className = 'output empty';
+            r.textContent = 'Your result will appear here…';
+        } else {
+            r.className = 'output';
+            r.textContent = text;
+        }
+    }
+
+    /* ---------- Actions ---------- */
+    function copyOutput() {
+        const r = $('result');
+        if (r.classList.contains('empty')) return;
+        navigator.clipboard.writeText(r.textContent).then(() => {
+            const t = $('toast');
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 1600);
+        });
+    }
+
+    function swap() {
+        const r = $('result');
+        if (r.classList.contains('empty')) return;
+        $('message').value = r.textContent;
+        setMode(mode === 'encrypt' ? 'decrypt' : 'encrypt');
+    }
+
+    function clearAll() {
+        $('message').value = '';
+        update();
+    }
+
+    update();
+</script>
+</body>
+</html>
